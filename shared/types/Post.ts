@@ -4,3 +4,9 @@ export interface IPost {
   title: string 
   body: string
 }
+
+export interface ICreatePost {
+  userId: number
+  title: string 
+  body: string
+}

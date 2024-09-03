@@ -22,18 +22,31 @@ export const usePostStore = defineStore('post', {
   actions: {
     async fetchPosts() {
       this.isLoading = true;
-      const { data } = await useFetch<IPost[]>(`${baseURL}/posts`);
+      const { data } = await useFetch('/api/post');
       if (data.value) {
         this.posts = data.value;
       }
       this.isLoading = false;
     },
+
+    async createPost(title: string, body: string) {
+      await $fetch('/api/createPost', {
+        method: 'POST',
+        body: {
+          title: title,
+          body: body,
+          userId: 1, 
+        }
+      });
+    },
+
     setPosts(posts: IPost[]) {
       this.posts = posts;
     },
     setCurrentPage(page: number) {
       this.currentPage = page;
-    }
+    },
+    
   },
 
   getters: {
