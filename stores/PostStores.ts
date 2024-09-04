@@ -3,30 +3,26 @@ import type { IPost } from '@/shared/types/Post';
 
 interface PostState {
   posts: IPost[]
-  isLoading: boolean
   currentPage: number
   postsPerPage: number
+  isSorted: boolean
 }
-
-const baseURL = 'https://jsonplaceholder.typicode.com';
 
 export const usePostStore = defineStore('post', {
 
   state: (): PostState => ({
     posts: [],
-    isLoading: false,
     currentPage: 1,
-    postsPerPage: 10
+    postsPerPage: 10,
+    isSorted: false
   }),
 
   actions: {
     async fetchPosts() {
-      this.isLoading = true;
       const { data } = await useFetch('/api/post');
       if (data.value) {
         this.posts = data.value;
       }
-      this.isLoading = false;
     },
 
     async createPost(title: string, body: string) {
@@ -38,13 +34,26 @@ export const usePostStore = defineStore('post', {
           userId: 1, 
         }
       });
+
+      this.posts.push({
+        userId: 1,
+        title: title,
+        body: body,
+        id: this.posts.length + 1
+      });
     },
 
     setPosts(posts: IPost[]) {
       this.posts = posts;
     },
+
     setCurrentPage(page: number) {
       this.currentPage = page;
+    },
+
+    sortPosts() {
+      this.posts.sort((a, b) => this.isSorted ? a.id - b.id : b.id - a.id);
+      this.isSorted = !this.isSorted;
     },
     
   },
@@ -53,14 +62,11 @@ export const usePostStore = defineStore('post', {
     getPosts: (state): IPost[] => state.posts,
     getActivePage: (state): number => state.currentPage,
     getPaginatedPosts: (state): IPost[] => {
-      state.isLoading = true;
       const startIndex = (state.currentPage - 1) * state.postsPerPage;
       const endIndex = startIndex + state.postsPerPage;
-      state.isLoading = false;
       return state.posts.slice(startIndex, endIndex);
     }, 
     getTotalPages: (state): number => Math.ceil(state.posts.length / state.postsPerPage),
-    getIsLoading: (state): boolean => state.isLoading,
   },
   
 });
